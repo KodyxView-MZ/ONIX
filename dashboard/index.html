@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>ONIX · Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        /* top bar moderna */
+        .top-bar {
+            background: #ffffff;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .menu-btn {
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            padding: 0.6rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-btn:hover {
+            background: #e9ecef;
+        }
+
+        .menu-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: #495057;
+            stroke-width: 1.5;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0a0c10;
+            letter-spacing: -0.3px;
+        }
+
+        .date-lang {
+            text-align: right;
+        }
+
+        .date {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .lang {
+            font-size: 0.7rem;
+            color: #868e96;
+            margin-top: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            justify-content: flex-end;
+        }
+
+        /* menu lateral moderno */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(3px);
+            z-index: 200;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.25s ease;
+        }
+
+        .menu-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background: #ffffff;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.08);
+            z-index: 201;
+            transition: left 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-menu.active {
+            left: 0;
+        }
+
+        /* perfil no menu */
+        .menu-profile {
+            padding: 1.8rem 1.5rem 1.2rem;
+            background: #fafbfc;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .profile-avatar {
+            width: 52px;
+            height: 52px;
+            background: #1a2634;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .profile-avatar svg {
+            width: 28px;
+            height: 28px;
+            stroke: white;
+        }
+
+        .profile-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.2rem;
+        }
+
+        .profile-phone {
+            font-size: 0.75rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .profile-phone svg {
+            width: 12px;
+            height: 12px;
+            stroke: #64748b;
+        }
+
+        .menu-header {
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .menu-header h3 {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #94a3b8;
+        }
+
+        .close-menu {
+            background: #f1f3f5;
+            border: none;
+            cursor: pointer;
+            padding: 0.35rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-menu svg {
+            width: 16px;
+            height: 16px;
+            stroke: #5c6f87;
+        }
+
+        .menu-items {
+            flex: 1;
+            padding: 0.5rem 0;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.75rem 1.5rem;
+            width: 100%;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #4a5568;
+            text-align: left;
+        }
+
+        .menu-item:hover {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .menu-item.active {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-left: 3px solid #0f172a;
+        }
+
+        .menu-item svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+        }
+
+        .menu-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #edf2f7;
+            margin-top: auto;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 0.7rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            color: #e53e3e;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #fff5f5;
+        }
+
+        .logout-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: #e53e3e;
+        }
+
+        /* conteúdo principal */
+        .main-content {
+            padding: 1.8rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* cards modernos */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: #ffffff;
+            border-radius: 1.25rem;
+            padding: 1.2rem 1.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            border-color: #dee2e6;
+        }
+
+        .metric-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #868e96;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 0.3rem;
+        }
+
+        .metric-sub {
+            font-size: 0.7rem;
+            color: #2b8c4e;
+            font-weight: 500;
+        }
+
+        /* tabela moderna */
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: #2c3e50;
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #e9ecef;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.9rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        th {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #868e96;
+            background: #fafbfc;
+        }
+
+        td {
+            font-size: 0.8rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .status-concluida {
+            background: #e6f7e6;
+            color: #2e7d32;
+        }
+
+        .status-pendente {
+            background: #fff3e0;
+            color: #ed6c02;
+        }
+
+        .panel {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .panel.active-panel {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .empty-state-modern {
+            background: #ffffff;
+            border-radius: 1rem;
+            padding: 2.5rem;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            color: #868e96;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            .main-content {
+                padding: 1rem;
+            }
+            .metric-value {
+                font-size: 1.4rem;
+            }
+            .top-bar {
+                padding: 0.7rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="logo-area">
+            <button class="menu-btn" id="menuToggleBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+            </button>
+            <div class="logo">
+                <h1>ONIX</h1>
+            </div>
+        </div>
+        <div class="date-lang">
+            <div class="date" id="currentDate"></div>
+            <div class="lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                Moçambique
+            </div>
+        </div>
+    </div>
+
+    <!-- menu overlay e lateral -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="menu-profile" id="menuProfile">
+            <div class="profile-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+            </div>
+            <div class="profile-name" id="profileName">Carregando...</div>
+            <div class="profile-phone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                    <line x1="12" y1="18" x2="12" y2="18" stroke-width="2" />
+                </svg>
+                <span id="profilePhone">---</span>
+            </div>
+        </div>
+        <div class="menu-header">
+            <h3>Menu principal</h3>
+            <button class="close-menu" id="closeMenuBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <div class="menu-items">
+            <button class="menu-item active" data-panel="inicial">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M3 9l9-6 9 6v11a2 2 0 0 1-2 2h-5v-7H9v7H5a2 2 0 0 1-2-2z" />
+                </svg>
+                Inicial
+            </button>
+            <button class="menu-item" data-panel="linkproduto">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                Link de produto
+            </button>
+            <button class="menu-item" data-panel="stock">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
+                Stock
+            </button>
+            <button class="menu-item" data-panel="pedidos">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M22 12h-4l-3 9-4-18-3 9H2" />
+                </svg>
+                Pedidos
+            </button>
+            <button class="menu-item" data-panel="perfil">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+                Perfil
+            </button>
+        </div>
+        <div class="menu-footer">
+            <button class="logout-btn" id="logoutBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Sair
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Painel Inicial -->
+        <div id="panel-inicial" class="panel active-panel">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-title">Vendas hoje</div>
+                    <div class="metric-value" id="vendasHoje">0 MT</div>
+                    <div class="metric-sub">↑ 12% vs ontem</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Pedidos</div>
+                    <div class="metric-value" id="totalPedidos">0</div>
+                    <div class="metric-sub">pendentes: <span id="pendentesCount">0</span></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Concluídas</div>
+                    <div class="metric-value" id="concluidasCount">0</div>
+                    <div class="metric-sub">últimos 30 dias</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Produtos em stock</div>
+                    <div class="metric-value" id="stockCount">0</div>
+                    <div class="metric-sub">baixo estoque: <span id="baixoEstoque">0</span></div>
+                </div>
+            </div>
+            <div class="section-title">Últimos pedidos</div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Produto</th><th>Comprador</th><th>Valor</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="tabelaPedidos">
+                        <tr><td colspan="4" style="text-align:center">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Painel Link de Produto -->
+        <div id="panel-linkproduto" class="panel">
+            <div class="empty-state-modern">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" style="margin-bottom: 0.8rem;">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                </svg>
+                <p>Gerencie os links dos seus produtos</p>
+                <button id="goToLinksBtn" style="margin-top: 1rem; background: #0f172a; color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 0.6rem; cursor: pointer; font-size: 0.8rem;">Acessar Links</button>
+            </div>
+        </div>
+
+        <!-- Outros painéis -->
+        <div id="panel-stock" class="panel"><div class="empty-state-modern"><p>📦 Gestão de stock em breve</p></div></div>
+        <div id="panel-pedidos" class="panel"><div class="empty-state-modern"><p>📋 Histórico de pedidos</p></div></div>
+        <div id="panel-perfil" class="panel"><div class="empty-state-modern"><p>👤 Configurações de perfil</p></div></div>
+    </div>
+
+    <script>
+        // Data Moçambique
+        function updateDateTime() {
+            const now = new Date();
+            const options = { timeZone: 'Africa/Maputo', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            let dateStr = now.toLocaleDateString('pt-PT', options);
+            dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+            document.getElementById('currentDate').innerHTML = dateStr;
+        }
+        updateDateTime();
+
+        // Dados mock
+        let pedidosData = [
+            { produto: "Diamante Azul", comprador: "Amélia Langa", valor: 12500, status: "concluida" },
+            { produto: "Esmeralda Colombiana", comprador: "João Macuacua", valor: 8400, status: "pendente" },
+            { produto: "Rubi Moçambicano", comprador: "Maria Tembe", valor: 5200, status: "concluida" },
+            { produto: "Safira Azul", comprador: "Carlos Manhique", valor: 7300, status: "pendente" },
+            { produto: "Turmalina Paraíba", comprador: "Isabel Nhampossa", valor: 9800, status: "concluida" }
+        ];
+
+        function atualizarMetricas() {
+            const vendasHoje = 34750;
+            const totalPedidos = pedidosData.length;
+            const concluidas = pedidosData.filter(p => p.status === "concluida").length;
+            const pendentes = totalPedidos - concluidas;
+            const stockTotal = 24;
+            const baixoEstoque = 3;
+
+            document.getElementById('vendasHoje').innerText = vendasHoje.toLocaleString('pt-PT') + " MT";
+            document.getElementById('totalPedidos').innerText = totalPedidos;
+            document.getElementById('concluidasCount').innerText = concluidas;
+            document.getElementById('pendentesCount').innerText = pendentes;
+            document.getElementById('stockCount').innerText = stockTotal;
+            document.getElementById('baixoEstoque').innerText = baixoEstoque;
+
+            const tbody = document.getElementById('tabelaPedidos');
+            tbody.innerHTML = pedidosData.map(p => `
+                <tr>
+                    <td>${p.produto}</td>
+                    <td>${p.comprador}</td>
+                    <td>${p.valor.toLocaleString('pt-PT')} MT</td>
+                    <td><span class="status-badge ${p.status === 'concluida' ? 'status-concluida' : 'status-pendente'}">${p.status === 'concluida' ? 'Concluída' : 'Pendente'}</span></td>
+                </tr>
+            `).join('');
+        }
+        atualizarMetricas();
+
+        // Carregar dados do usuário
+        function loadUserProfile() {
+            const session = localStorage.getItem("onix_session");
+            if (!session) {
+                window.location.href = "/acesso/";
+                return null;
+            }
+            try {
+                const user = JSON.parse(session);
+                document.getElementById('profileName').innerText = user.name || "Usuário";
+                document.getElementById('profilePhone').innerText = user.phone || "---";
+                return user;
+            } catch(e) {
+                window.location.href = "/acesso/";
+                return null;
+            }
+        }
+        loadUserProfile();
+
+        // Menu
+        const menuOverlay = document.getElementById('menuOverlay');
+        const sideMenu = document.getElementById('sideMenu');
+        const menuToggle = document.getElementById('menuToggleBtn');
+        const closeMenuBtn = document.getElementById('closeMenuBtn');
+
+        function openMenu() { sideMenu.classList.add('active'); menuOverlay.classList.add('active'); }
+        function closeMenu() { sideMenu.classList.remove('active'); menuOverlay.classList.remove('active'); }
+        menuToggle.addEventListener('click', openMenu);
+        closeMenuBtn.addEventListener('click', closeMenu);
+        menuOverlay.addEventListener('click', closeMenu);
+
+        // Navegação
+        const panels = {
+            inicial: document.getElementById('panel-inicial'),
+            linkproduto: document.getElementById('panel-linkproduto'),
+            stock: document.getElementById('panel-stock'),
+            pedidos: document.getElementById('panel-pedidos'),
+            perfil: document.getElementById('panel-perfil')
+        };
+
+        const menuItems = document.querySelectorAll('.menu-item');
+        
+        function navigateTo(panelId) {
+            Object.values(panels).forEach(p => { if(p) p.classList.remove('active-panel'); });
+            if(panels[panelId]) panels[panelId].classList.add('active-panel');
+            menuItems.forEach(item => {
+                if(item.getAttribute('data-panel') === panelId) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+            closeMenu();
+        }
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const target = item.getAttribute('data-panel');
+                if(target === 'linkproduto') {
+                    window.location.href = "/links/index.html";
+                } else if(target === 'stock') {
+                    window.location.href = "/stock/index.html";
+                } else if(target === 'pedidos') {
+                    window.location.href = "/pedidos/index.html";
+                } else if(target === 'perfil') {
+                    window.location.href = "/perfil/index.html";
+                } else {
+                    navigateTo(target);
+                }
+            });
+        });
+
+        // Botão dentro do painel de links
+        document.addEventListener('click', (e) => {
+            if(e.target.id === 'goToLinksBtn') {
+                window.location.href = "/links/index.html";
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem("onix_session");
+            window.location.href = "/acesso/";
+        });
+    </script>
+</body>
+          </html>
